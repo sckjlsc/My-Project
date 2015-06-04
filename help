@@ -1,0 +1,13 @@
+#!/bin/bash
+
+help()
+{
+cat << HELP
+help message
+convert binary to oct
+HELP
+exit 0
+}
+#[ -z "$1" ] && help
+#[ "$1" = "-h" ] && help
+echo -e "\033]0;$1\007"

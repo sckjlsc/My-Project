@@ -1,0 +1,41 @@
+" contents of minimal .vimrc
+let mapleader=";"
+runtime bundle/pathogen/autoload/pathogen.vim
+execute pathogen#infect()
+syntax enable
+syntax on
+filetype on
+filetype plugin on
+filetype indent on
+set expandtab
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set laststatus=2
+set ruler
+set number
+set cursorline
+set hlsearch
+set guifont=YaHei\ Consolas\ Hybrid\ 11.5
+set nowrap
+let g:Powerline_colorscheme='solarized256'
+" copy paste
+nmap <Leader>y "+y
+nmap <Leader>p "+p
+" plugin settings
+nmap <Leader>ch :A<CR>
+nmap <Leader>sch :AS<CR>
+nmap <Leader>n :NERDTreeToggle<CR>
+nmap <Leader>t :TagbarToggle<CR>
+" ycm settings
+highlight Pmenu ctermfg=2 ctermbg=3 guifg=#005f87 guibg=#EEE8D5
+highlight PmenuSel ctermfg=2 ctermbg=3 guifg=#AFD700 guibg=#106900
+let g:ycm_complete_in_comments=1
+let g:ycm_confirm_extra_conf=0
+let g:ycm_collect_identifiers_from_tags_files=1
+set tags+=/data/misc/software/misc./vim/stdcpp.tags
+inoremap <leader>; <C-x><C-o>
+set completeopt-=preview
+let g:ycm_min_num_of_chars_for_completion=1
+let g:ycm_cache_omnifunc=0
+let g:ycm_seed_identifiers_with_syntax=1

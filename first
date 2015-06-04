@@ -1,0 +1,16 @@
+#!/bin/bash
+a="hello world"
+echo "A is:" $a
+num=2
+echo "this is the ${num}nd"
+echo "this is the {$num}nd"
+if [ ${SHELL} = "/bin/bash" ]; then
+    echo "your login shell is the bash (bourne again shell)"
+else
+    echo "your login shell is not bash but ${SHELL}"
+fi
+[ -f "/etc/shadow" ] && echo "This computer uses shadow passwords"
+mailfolder=/var/spool/mail/james
+[ -r "$mailfolder" ] || { echo "Can not read $mailfolder" ; exit 1; }
+echo "mailfolder has mail from:"
+grep "^From " $mailfolder

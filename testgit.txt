@@ -1,2 +1,3 @@
 renren
-test git
+xiaonei
+test git1
