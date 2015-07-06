@@ -35,6 +35,7 @@ private:
 	Client* m_client;
 	boost::thread *m_thread;
 	ControlerManager* m_controlerMgr;
+	boost::asio::io_service service;
 	
 };
 

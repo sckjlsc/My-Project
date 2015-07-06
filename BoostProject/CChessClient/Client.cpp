@@ -50,43 +50,79 @@ void Client::conn_handler(const boost::system::error_code& ec)
 	}
 	boost::asio::socket_base::keep_alive option(true);
 	m_socket.set_option(option);
-	do_write("client 0");
+	do_read_header();
+	send("clie\r\n\tnt 0");
 	//do_write("connected to " + m_socket.remote_endpoint().address().to_string() + "\n");  
 }
 
-void Client::do_read()
+void Client::do_read_header()
 {
 	memset(read_buffer_, 0, sizeof(read_buffer_));
-	async_read(m_socket, buffer(read_buffer_), MEM_FN2(is_read_complete, _1, _2), MEM_FN2(handle_read, _1, _2));
+	async_read(m_socket,buffer(read_buffer_, header_len),
+		[this](boost::system::error_code ec, std::size_t /*length*/)
+	{
+		if (!ec)
+		{
+			char header[header_len + 1] = "";
+			std::strncat(header, read_buffer_, header_len);
+			int body_length = std::atoi(header);
+			
+
+			do_read_body(body_length);
+		}
+	});
 }
+
+void Client::do_read_body(int body_length)
+{
+	memset(read_buffer_, 0, sizeof(read_buffer_));
+	async_read(m_socket, buffer(read_buffer_,body_length), MEM_FN2(handle_read, _1, _2));
+}
+
 size_t Client::is_read_complete(const boost::system::error_code &err, size_t bytes)
 {
-	if (err) return 0;
+	if (err)
+	{
+		return 0;
+	}
+	bool found = std::find(read_buffer_, read_buffer_ + bytes, '\n') < read_buffer_ + bytes;
 	if (bytes == 8)
 	{
 		return 0;
 	}
 	return 1;
 
-	bool found = std::find(read_buffer_, read_buffer_ + bytes, '\n') < read_buffer_ + bytes;
+	
 	return found ? 0 : 1;
 }
 void Client::handle_read(const boost::system::error_code & err, size_t bytes)
 {
+	if (err)
+	{
+		return;
+	}
 	std::string msg(read_buffer_, bytes);
 	QString replyReceivedStr = QString::fromStdString(msg);
 	emit responseReceived(replyReceivedStr);
-	do_read();
+	do_read_header();
 }
 void Client::do_write(const std::string& msg)
 {
 	memset(write_buffer_, 0, sizeof(write_buffer_));
-	std::copy(msg.begin(), msg.end(), write_buffer_);
-	m_socket.async_write_some(buffer(write_buffer_, msg.size()), MEM_FN2(handle_write, _1, _2));
+
+	char header[header_len + 1] = "";
+	std::sprintf(header, "%4d", msg.length());
+	std::memcpy(write_buffer_, header, header_len);
+
+	std::strcpy(write_buffer_ + header_len, msg.c_str());
+	m_socket.async_write_some(buffer(write_buffer_, msg.size() + header_len), MEM_FN2(handle_write, _1, _2));
 }
-void Client::handle_write(const boost::system::error_code& /*error*/, size_t /*bytes_transferred*/)
+void Client::handle_write(const boost::system::error_code& err, size_t /*bytes_transferred*/)
 {
-	do_read();
+	if (err)
+	{
+		return;
+	}
 }
 
 void Client::send(const QString& message)

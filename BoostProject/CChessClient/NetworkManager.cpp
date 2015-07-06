@@ -2,17 +2,10 @@
 #include "Client.h"
 #include "ControlerManager.h"
 
-
-boost::asio::io_service service1;
-void runService1()
-{
-	service1.run();
-}
-
 NetworkManager::NetworkManager(ControlerManager* mgr, QObject* parent)
 	:QObject(parent), m_controlerMgr(mgr)
 {
-	m_client = new Client(service1);
+	m_client = new Client(service);
 }
 
 bool NetworkManager::init()
@@ -28,7 +21,7 @@ bool NetworkManager::connectSigSlot()
 
 bool NetworkManager::startup()
 {
-	m_thread = new boost::thread(runService1);	
+	m_thread = new boost::thread([this]{service.run();});
 	//thread1.join();
 	return true;
 }

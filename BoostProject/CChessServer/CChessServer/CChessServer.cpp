@@ -50,7 +50,7 @@ public:
 		started_ = true;
 		boost::asio::socket_base::keep_alive option(true);
 		sock_.set_option(option);
-		do_read();
+		do_read_header();
 	}
 
 	static ptr new_() {
@@ -63,15 +63,43 @@ public:
 		sock_.close();
 	}
 	ip::tcp::socket & sock() { return sock_; }
-	void do_read() {
-		memset(&read_buffer_[0], 0, sizeof(read_buffer_));
-		async_read(sock_, buffer(read_buffer_), MEM_FN2(read_complete, _1, _2), MEM_FN2(on_read, _1, _2));
+	//void do_read() {
+	//	memset(&read_buffer_[0], 0, sizeof(read_buffer_));
+	//	async_read(sock_, buffer(read_buffer_), MEM_FN2(read_complete, _1, _2), MEM_FN2(on_read, _1, _2));
+	//}
+	void do_read_header()
+	{
+		memset(read_buffer_, 0, sizeof(read_buffer_));
+		async_read(sock_, buffer(read_buffer_, header_len),
+			[this](boost::system::error_code ec, std::size_t /*length*/)
+		{
+			if (!ec)
+			{
+				char header[header_len + 1] = "";
+				std::strncat(header, read_buffer_, header_len);
+				int body_length = std::atoi(header);
+
+
+				do_read_body(body_length);
+			}
+		});
 	}
+
+	void do_read_body(int body_length)
+	{
+		memset(read_buffer_, 0, sizeof(read_buffer_));
+		async_read(sock_, buffer(read_buffer_, body_length), MEM_FN2(on_read, _1, _2));
+	}
+
 	void do_write(const std::string & msg) {
 		if (!started()) return;
 		memset(&write_buffer_[0], 0, sizeof(write_buffer_));
-		std::copy(msg.begin(), msg.end(), write_buffer_);
-		sock_.async_write_some(buffer(write_buffer_, msg.size()), MEM_FN2(on_write, _1, _2));
+		char header[header_len + 1] = "";
+		std::sprintf(header, "%4d", msg.length());
+		std::memcpy(write_buffer_, header, header_len);
+		std::strcpy(write_buffer_ + header_len, msg.c_str());
+		//std::copy(msg.begin(), msg.end(), (write_buffer_ + header_len));
+		sock_.async_write_some(buffer(write_buffer_, msg.size() + header_len), MEM_FN2(on_write, _1, _2));
 	}
 	size_t read_complete(const boost::system::error_code & err, size_t bytes) {
 		if (err) return 0;
@@ -91,14 +119,15 @@ public:
 		//stop();
 	}
 	void on_write(const boost::system::error_code & err, size_t bytes) {
-		do_read();
+		do_read_header();
 	}
 	bool started() { return started_; }
 private:
 	ip::tcp::socket sock_;
-	enum { max_msg = 1024 };
-	char read_buffer_[max_msg];
-	char write_buffer_[max_msg];
+	enum { header_len = 4 };
+	enum { max_body_len = 65535 };
+	char read_buffer_[max_body_len + header_len];
+	char write_buffer_[max_body_len + header_len];
 	bool started_;
 };
 
