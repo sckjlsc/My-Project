@@ -1,0 +1,123 @@
+本文使用的环境：
+
+QT Library： 4.8.1 qt-everywhere-opensource-src-4.8.1.tar.gz
+QT Creator：2.4.1 qt-creator-linux-x86-opensource-2.4.1.bin
+Ubuntu：10.04.4 ubuntu-10.04.4-desktop-i386.iso或者 Ubuntu 12.04 LTS  ubuntu-12.04.3-desktop-i386.iso 或者 Ubuntu 13.10 ubuntu-13.10-desktop-i386.iso 
+
+注意：如果您安装Ubuntu时候是联网的话，Ubuntu会自动安装QT Library，Ubuntu10默认安装QT3，Ubuntu12默认安装QT4.8，Ubuntu13默认安装QT5，你可以在终端里面输入“qmake -v"查看QT版本来检测是否已经默认安装QT，如果已经安装，请直接跳到第二大步安装QT Creator。
+
+安装QT分为两步，第一步是QT Library的安装，第二步是QT Creator的安装，QT Creator是QT的集成开发环境。
+
+第一步   安装QT Library：
+
+1、诺基亚把QT卖给Digia后，QT商业版和开源版就分开了，开源版全部放在QT Project网站上，从该网站下载qt-everywhere-opensource-src-4.8.1.tar.gz。可以在Ubuntu里面使用Firefox浏览器下载，默认下载目录是/home/your name/Downloads，使用终端cd到Downloads目录，然后使用命令
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+tar xzvf qt-everywhere-opensource-src-4.8.1.tar.gz  
+
+解压软件包，解压完后，cd到该目录
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+cd qt-everywhere-opensource-src-4.8.1  
+
+2、我的电脑在Ubuntu 10.04.4环境下，没有安装g++，编译QT要用到g++，所以首先安装g++，使用apt-get命令安装g++，
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+sudo apt-get install g++  
+
+3、然后需要安装libX11-dev libXext-dev libXtst-dev这三个包，这点非常重要，很多朋友因为没有安装这三个包而出现以下错误，
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+Basic XLib functionality test failed!  
+You might need to modify the include and library search paths by editing  
+QMAKE_INCDIR_X11 and QMAKE_LIBDIR_X11 in /home/your name/Qt/qt-x11-opensource-src-4.8.1/mkspecs/linux-g++  
+
+使用apt-get安装这三个包，
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+sudo apt-get install libX11-dev libXext-dev libXtst-dev  
+
+4、如果你的Ubuntu已经安装g++和libX11-dev libXext-dev libXtst-dev，可以跳过2，3两步。在进入qt-everywhere-opensource-src-4.8.1目录后，使用如下命令配置QT Library，
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+./configure  
+
+注意不能直接输入configure，必须加上 "./" 才可以。然后终端会出现让你选择商业版还是开源版，输入字母o选择开源版。然后会有协议让你接受，输入yes就OK啦。
+
+5、经过漫长地等待后，终端会出现如下信息，
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+Qt  is now configured for building ,just run 'make'  
+Once everything is built , you must run 'make  install'  
+Qt will be installed into /usr/local/Qt-4.8.1  
+To  reconfigure ,run 'make confclean' and 'configure'  
+
+然后输入make，这样会生成QT库，同时编译所有演示程序。
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+make  
+
+6、QT编译完成后，输入make install来安装QT，注意make install需要root权限，所以要加sudo。
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+sudo make install  
+
+7、经过漫长等待，QT安装完毕后，首先进入QT安装目录测试QT是否安装成功，QT默认安装在/usr/local/Trolltech/Qt-4.8.1目录里面，所以先进入该目录，
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+cd /usr/local/Trolltech/Qt-4.8.1  
+
+然后在进入qmake所在的bin文件夹，
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+cd bin  
+
+然后输入qmake，如果出现正常的信息，则表明QT已经安装成功。或者输入以下指令，
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+qmake -v  
+
+如果出现正确的版本信息，则表示安装成功了。
+
+8、接下来要设置环境变量，设置环境变量的目的是为了在任何目录下都可以使用QT。首先需要设置用户环境变量，
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+gedit /home/your name/.bashrc   
+
+然后会弹出一个编辑窗口，在末尾添加以下代码，
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+export QTDIR=/usr/local/Trolltech/Qt-4.8.1   
+export PATH=$QTDIR/bin:$PATH   
+export MANPATH=$QTDIR/man:$MANPATH   
+export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH  
+
+然后设置root用户的环境变量，设置root用户的环境变量需要root权限，所以要加sudo，
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+sudo gedit /etc/profile  
+
+然后会弹出一个编辑窗口，在末尾添加以下代码，
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+export QTDIR=/usr/local/Trolltech/Qt-4.8.1   
+export PATH=$QTDIR/bin:$PATH   
+export MANPATH=$QTDIR/man:$MANPATH   
+export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH  
+
+保存后退出，然后重启电脑。
+
+9、重启电脑后，打开终端在任意目录下输入qmake，如果能出现正确信息，则表明环境变量已经配置成功。
+
+
+第二步   安装QT Creator：
+
+相比QT Library，QT Creator的安装要简单的多，我们下载的bin文件是可执行文件，安装时会出现像在Windows下的界面，安装路径默认就可以了。使用终端cd到Downloads目录，首先修改bin文件的权限使其具有可执行的权限，
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+chmod a+x qt-creator-linux-x86-opensource-2.4.1.bin  
+
+然后输入以下命令安装bin文件，
+
+[plain] view plaincopyprint?在CODE上查看代码片派生到我的代码片
+./qt-creator-linux-x86-opensource-2.4.1.bin  
+
+至此，QT已经安装完毕，打开桌面上的QT Creator来运行一个demo测试吧！
